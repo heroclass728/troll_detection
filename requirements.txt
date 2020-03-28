@@ -1,0 +1,6 @@
+google
+six
+numpy
+tensorflow==1.13.1
+pillow
+opencv-python
