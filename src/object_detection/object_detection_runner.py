@@ -4,12 +4,12 @@ import tensorflow as tf
 
 from src.object_detection.detect_utils import visualization_utils as vis_util
 from src.object_detection.detect_utils import label_map_util
-from settings import LABEL_PATH, MODEL_PATH
+from settings import LABEL_PATH, MODEL_PATH, THRESHOLD
 
 
 class ObjectDetector:
 
-    def __init__(self, threshold=0.9):
+    def __init__(self):
         label_map = label_map_util.load_labelmap(LABEL_PATH)
         self.categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=sys.maxsize,
                                                                          use_display_name=True)
@@ -21,7 +21,7 @@ class ObjectDetector:
                 serialized_graph = fid.read()
                 od_graph_def.ParseFromString(serialized_graph)
                 tf.import_graph_def(od_graph_def, name='')
-        self.threshold = threshold
+        self.threshold = THRESHOLD
 
     def detect_object(self, frame):
         im_width = frame.shape[1]
@@ -54,14 +54,14 @@ class ObjectDetector:
                 object_description = []
                 for box, obj_class, score in zip(boxes[0], classes[0], scores[0]):
 
-                    # if score > self.threshold:
-                    y_min, x_min, y_max, x_max = box
-                    if y_min != 0 and x_min != 0 and y_max != 0 and y_min != 0:
-                        object_coordinate.append((int(x_min * im_width), int(y_min * im_height),
-                                                  int(x_max * im_width), int(y_max * im_height)))
-                        object_description.append(obj_class)
+                    if score >= self.threshold:
+                        y_min, x_min, y_max, x_max = box
+                        if y_min != 0 and x_min != 0 and y_max != 0 and y_min != 0:
+                            object_coordinate.append((int(x_min * im_width), int(y_min * im_height),
+                                                      int(x_max * im_width), int(y_max * im_height)))
+                            object_description.append(obj_class)
 
-        return frame, object_coordinate, object_description
+        return object_coordinate, object_description
 
 
 def load_image_into_numpy_array(image):

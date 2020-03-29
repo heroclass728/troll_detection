@@ -17,7 +17,7 @@ class BeverageCounter:
 
     def detect_beverages(self, img):
 
-        detect_img, coordinates, obj_descriptions = self.obj_detector.detect_object(img)
+        coordinates, obj_descriptions = self.obj_detector.detect_object(img)
         obj_attr = ""
         for rect, obj_des in zip(coordinates, obj_descriptions):
             if obj_des == 1.0:
