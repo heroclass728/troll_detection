@@ -9,7 +9,7 @@ from settings import LABEL_PATH, MODEL_PATH
 
 class ObjectDetector:
 
-    def __init__(self, threshold=0.3):
+    def __init__(self, threshold=0.9):
         label_map = label_map_util.load_labelmap(LABEL_PATH)
         self.categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=sys.maxsize,
                                                                          use_display_name=True)

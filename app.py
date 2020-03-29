@@ -1,23 +1,7 @@
-import cv2
-
-from src.object_detection.object_detection_runner import ObjectDetector
-
-
-def detect_beverage():
-
-    obj_detector = ObjectDetector()
-
-    cap = cv2.VideoCapture(0)
-    while True:
-        ret, frame = cap.read()
-        detect_img, coordinate, obj_description = obj_detector.detect_object(frame)
-
-        cv2.imshow("Detected beverage", detect_img)
-        if cv2.waitKey(1) & 0xFF == ord('q'):  # press q to quit
-            break
-    cap.release()
+from src.object_counter.beverage_counter import BeverageCounter
 
 
 if __name__ == '__main__':
 
-    detect_beverage()
+    BeverageCounter().main(video_path="/media/mensa/Data/Task/TrolleyDetection/"
+                                      "How to Sip a Soda, Like a Sir _ FOODBEAST LABS.mp4")
