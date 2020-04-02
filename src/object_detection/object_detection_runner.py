@@ -75,6 +75,6 @@ def load_image_into_numpy_array(image):
 if __name__ == '__main__':
 
     object_detector = ObjectDetector()
-    img = cv2.imread("/media/mensa/Data/Task/TrolleyDetection/train_data/new_train_data/13.jpg")
+    img = cv2.imread("/media/mensa/Data/Task/TrolleyDetection/train_data/new_train_data/35.jpg")
     detected_frame, _, _ = object_detector.detect_object(frame=img)
     cv2.imwrite("object detected frame.jpg", detected_frame)

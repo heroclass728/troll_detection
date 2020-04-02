@@ -42,7 +42,7 @@ is trained with the data set of beverages.
         pip3 install -r requirements.txt
     ```
 
-- Please download the trained model from https://drive.google.com/file/d/1UQ8tFZkGvC1IVNzLSMhsnCg9w5ByY9Lj/view?usp=sharing
+- Please download the trained model from https://drive.google.com/file/d/1QT12a7qlOPD0Yz3Af6eBkzg4uEZ8SauQ/view?usp=sharing
 and copy it to utils/model.
 
 ## Execution
