@@ -1,4 +1,14 @@
 item {
   id: 1
-  name: 'beverage'
+  name: 'water'
+}
+
+item {
+  id: 2
+  name: 'cocacola'
+}
+
+item {
+  id: 3
+  name: 'pepsi'
 }

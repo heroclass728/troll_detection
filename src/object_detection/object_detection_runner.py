@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 import tensorflow as tf
+import cv2
 
 from src.object_detection.detect_utils import visualization_utils as vis_util
 from src.object_detection.detect_utils import label_map_util
@@ -61,7 +62,7 @@ class ObjectDetector:
                                                       int(x_max * im_width), int(y_max * im_height)))
                             object_description.append(obj_class)
 
-        return object_coordinate, object_description
+        return frame, object_coordinate, object_description
 
 
 def load_image_into_numpy_array(image):
@@ -69,3 +70,11 @@ def load_image_into_numpy_array(image):
     if image.getdata().mode != "RGB":
         image = image.convert('RGB')
     return np.array(image.getdata()).reshape((im_height, im_width, 3)).astype(np.uint8)
+
+
+if __name__ == '__main__':
+
+    object_detector = ObjectDetector()
+    img = cv2.imread("/media/mensa/Data/Task/TrolleyDetection/train_data/new_train_data/13.jpg")
+    detected_frame, _, _ = object_detector.detect_object(frame=img)
+    cv2.imwrite("object detected frame.jpg", detected_frame)

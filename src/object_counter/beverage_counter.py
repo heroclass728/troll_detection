@@ -3,6 +3,7 @@ import dlib
 
 from src.object_detection.object_detection_runner import ObjectDetector
 from settings import MARGIN, WEB_CAM, TRACK_CYCLE, LOCAL
+from src.data_processing.data_import import ImportData
 
 
 class BeverageCounter:
@@ -14,14 +15,20 @@ class BeverageCounter:
         self.beverage_names = {}
         self.beverage_attributes = {}
         self.obj_detector = ObjectDetector()
+        self.data_importer = ImportData()
 
     def detect_beverages(self, img):
 
-        coordinates, obj_descriptions = self.obj_detector.detect_object(img)
+        _, coordinates, obj_descriptions = self.obj_detector.detect_object(img)
         obj_attr = ""
         for rect, obj_des in zip(coordinates, obj_descriptions):
             if obj_des == 1.0:
-                obj_attr = "beverage"
+                obj_attr = "water"
+            elif obj_des == 2.0:
+                obj_attr = "cocacola"
+            elif obj_des == 3.0:
+                obj_attr = "pepsi"
+
             left = rect[0]
             top = rect[1]
             right = rect[2]
@@ -65,7 +72,7 @@ class BeverageCounter:
                 # Increase the currentFaceID counter
                 self.current_beverage_id += 1
 
-        return coordinates
+        return
 
     def track_beverages(self, beverage_image):
 
@@ -78,12 +85,17 @@ class BeverageCounter:
 
             cv2.rectangle(beverage_image, (t_left, t_top), (t_right, t_bottom), (0, 0, 255), 2)
 
-            cv2.putText(beverage_image, 'Id_{}'.format(self.beverage_attributes[fid][0]), (int(t_right), int(t_top)),
+            cv2.putText(beverage_image, str(self.beverage_attributes[fid][1]), (int(t_right), int(t_top)),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
-        return beverage_image, self.beverage_trackers.keys()
+        return beverage_image
 
     def main(self, video_path=None):
+
+        init_waters = 0
+        init_cocacolas = 0
+        init_pepsis = 0
+        suit_count = 0
 
         if WEB_CAM:
             cap = cv2.VideoCapture(0)
@@ -95,7 +107,7 @@ class BeverageCounter:
 
             ret, img = cap.read()
             # img = self.detect_one_frame(img=img)
-            # img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+            img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
             result_image = img.copy()
             cnt += 1
             fids_to_delete = []
@@ -113,15 +125,42 @@ class BeverageCounter:
                 self.beverage_attributes.pop(fid, None)
 
             if cnt % TRACK_CYCLE == 0:
-                beverages = self.detect_beverages(img=img)
+                self.detect_beverages(img=img)
             else:
-                result_image, beverages = self.track_beverages(beverage_image=result_image)
+                result_image = self.track_beverages(beverage_image=result_image)
 
             if LOCAL:
-                cv2.putText(result_image, 'Counter: {}'.format(str(len(beverages))), (20, 20),
+                waters = 0
+                cocacolas = 0
+                pepsis = 0
+                for idx in self.beverage_attributes.keys():
+                    if self.beverage_attributes[idx][1] == "water":
+                        waters += 1
+                    elif self.beverage_attributes[idx][1] == "cocacola":
+                        cocacolas += 1
+                    if self.beverage_attributes[idx][1] == "pepsi":
+                        pepsis += 1
+                cv2.putText(result_image, 'Water: {}'.format(str(waters)), (20, 20),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                cv2.putText(result_image, 'Coca cola: {}'.format(str(cocacolas)), (20, 40),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                cv2.putText(result_image, 'Pepsi: {}'.format(str(pepsis)), (20, 60),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
                 cv2.imshow("image", result_image)
-                # time.sleep(0.03)
+
+                if abs(init_cocacolas - cocacolas) == 0 and abs(init_waters - waters) == 0 and \
+                        abs(init_pepsis - pepsis) == 0:
+                    suit_count += 1
+                else:
+                    suit_count = 0
+
+                init_pepsis = pepsis
+                init_waters = waters
+                init_cocacolas = cocacolas
+
+                if suit_count == TRACK_CYCLE * 5 and len(self.beverage_attributes.keys()) != 0:
+                    self.data_importer.import_parsing_data(barcode="", types=["water", "coca cola", "pepsi"],
+                                                           amounts=[init_waters, init_cocacolas, init_pepsis])
 
                 if cv2.waitKey(1) & 0xFF == ord('q'):  # press q to quit
                     break
