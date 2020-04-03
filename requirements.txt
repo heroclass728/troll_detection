@@ -1,7 +1,7 @@
 google
 six
 numpy
-tensorflow==1.13.1
+tensorflow==1.15.2
 pillow
 opencv-python
 dlib
